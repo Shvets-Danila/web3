@@ -1,73 +1,134 @@
+  
 <?php
 header('Content-Type: text/html; charset=UTF-8');
+?>
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <title>Форма</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css"
+        integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+</head>
+<body class="container">
+
+<?php
+$ability_labels = [1 => 'Бессмертие', 3=> 'Левитация', 2 => 'Прохождение сквозь стены'];
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    if (!empty($_GET['save'])) {
-        print('Rezyltat otpravlen.');
-    }
-    include('web3/form.php');
-    exit();
+  if (!empty($_GET['save'])) {
+    print('<div class="row justify-content-md-center p-4">Спасибо, результаты сохранены.<br></div>');
+  }
+  include('form.php');
+  exit();
 }
-include('web3.3/form.php');
+
 $errors = FALSE;
-if (empty($_POST['Name'])) {
-    print('Name.<br/>');
+
+?>
+<div class="row justify-content-md-center p-4">
+<div class="col-12 col-md-6 jumbotron">
+<?php
+if (empty($_POST['name'])) {
+  print('Заполните имя.<br/>');
+  $errors = TRUE;
+}
+else if (!preg_match('/^[а-яА-Я ]+$/u', $_POST['name'])) {
+  print('Недопустимые символы в имени.<br/>');
+  $errors = TRUE;
+}
+if (empty($_POST['bio'])){
+    print('Заполните биографию<br>');
     $errors = TRUE;
 }
-if (empty($_POST['Name'])) {
-    print('email.<br/>');
+if (empty($_POST['year'])) {
+    print('Заполните год.<br/>');
     $errors = TRUE;
 }
-if (empty($_POST['Year'])) {
-    print('Year.<br/>');
+else {
+  $year = $_POST['year'];
+  if (!(is_numeric($year) && intval($year) >= 1900 && intval($year) <= 2020)) {
+    print('Укажите корректный год.<br/>');
+    $errors = TRUE;
+  }
+}
+
+$ability_data = array_keys($ability_labels);
+if (empty($_POST['powers'])) {
+    print('Выберите способность.<br/>');
     $errors = TRUE;
 }
-if (empty($_POST['Sex'])) {
-    print('Viberi pol.<br/>');
-    $errors = TRUE;
+else{
+  $abilities = $_POST['powers'];
+  foreach ($abilities as $ability) {
+    if (!in_array($ability, $ability_data)) {
+      print('Плохая способность!<br/>');
+      $errors = TRUE;
+    }
+  }
 }
-if (empty($_POST['KolKon'])) {
-    print('Konechnosti.<br/>');
-    $errors = TRUE;
-}
-if (count($_POST['Sposobnosti']) == 0) {
-    print('Sposobnosti.<br/>');
-    $errors = TRUE;
-}
-if (empty($_POST['Biog'])) {
-    print('Biografia.<br/>');
-    $errors = TRUE;
-}
-if(isset($_POST['Checkbox']) && $_POST['Checkbox'] == 'Yes')
+if(!isset($_POST['gender']))
 {
-    $ch='Oznakomlen';
+    print('Выберите пол<br>');
+    $errors = TRUE;
 }
-else
+else if(intval($_POST['gender'])<0 || intval($_POST['gender'])>1)
 {
-    print('Look at checkbox');
+    print('Неверно указан пол<br>');
+    $errors = TRUE;
+}
+
+if(empty($_POST['bodyparts']))
+{
+    print('Выберите количество конечностей<br>');
+    $errors = TRUE;
+}
+else if($_POST['bodyparts']<1 || $_POST['bodyparts']>4)
+{
+    print('Неверное количество конечностей<br>');
+    $erros = TRUE;
+}
+if(empty($_POST['email'])){
+    print('Укажите email<br>');
+    $errors = TRUE;
+}else if(!preg_match('/^.*\@.*\..+$/u', $_POST['email'])){
+    print('Неверно указан email<br>');
+    $errors = TRUE;
+}
+if(empty($_POST['agreed']))
+{
+    print('Вы не ознакомились с контрактом<br>');
+    $errors = TRUE;
+}else if($_POST['agreed']!=="on"){
+    print('Вы не ознакомились с контрактом<br>');
     $errors = TRUE;
 }
 if ($errors) {
-    // При наличии ошибок завершаем работу скрипта.
+    print('<a href="index.php">Назад</a><br>');
+}
+?>
+</div>
+</div>
+<?php
+if ($errors) {
     exit();
 }
-$sposobnosti='';
 
-for($i=0;$i<count($_POST['Sposobnosti']);$i++){
-    $sposobnosti .= $_POST['Sposobnosti'][$i] . ' ';
-}
-
-$user = 'u20399';
-$pass = '2132705';
-$db = new PDO('mysql:host=localhost;dbname=u20399', $user, $pass, array(PDO::ATTR_PERSISTENT => true));
-
+$user = 'u15912';
+$pass = '8355498';
+$db = new PDO('mysql:host=localhost;dbname=u15912', $user, $pass, array(PDO::ATTR_PERSISTENT => true));
 try {
-    $stmt = $db->prepare("INSERT INTO form (Name,Year,EMail,Sex,KolKon,Sposobnosti,Biog,Checkbox) VALUES (:Name,:Year,:EMail,:Sex,:KolKon,:Sposobnosti,:Biog,:Checkbox)");
-    $stmt -> execute(array('Name'=>$_POST['Name'],'Year'=>$_POST['Year'],'EMail'=>$_POST['EMail'],'Sex'=>$_POST['Sex'],'KolKon'=>$_POST['KolKon'],'Sposobnosti'=>$sposobnosti, 'Biog'=>$_POST['Biog'],'Checkbox'=>$ch));
+$stmt = $db->prepare("INSERT INTO web3 (name, year, powers, bio, gender, email, bodyparts) VALUES (?, ?, ?, ?, ?, ?, ?)");
+$stmt->execute(array($_POST['name'], intval($year), implode(',',$_POST['powers']), $_POST['bio'], intval($_POST['gender']), $_POST['email'], intval($_POST['bodyparts'])));
 }
 catch(PDOException $e){
-    print('Error : ' . $e->getMessage());
-    exit();
+  print('Error : ' . $e->getMessage());
+  exit();
 }
 
 header('Location: ?save=1');
+
 ?>
+</body>
